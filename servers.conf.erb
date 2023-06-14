@@ -1,0 +1,14 @@
+# Default empty server
+server {
+  listen <%= ENV['PORT'] %> default_server;
+  server_name _;
+  modsecurity on;   # Enable ModSecurity on /
+  modsecurity_rules_file /app/modsecurity_rules.conf;   # load custom rules file
+
+  location / {
+    # simple 'ok' response
+    #
+    add_header Content-Type text/plain;
+    return 200 'ok';
+  }
+}
