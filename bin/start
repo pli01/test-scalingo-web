@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+basedir="$( cd -P "$(dirname $(dirname "$0" ))" && pwd )"
+
+# generate allow-ip.conf
+echo "# generate allow-ip.conf"
+export ALLOWED_IPS_CONF="$basedir/vendor/nginx/conf/allow-ips.conf"
+> $basedir/vendor/nginx/conf/allow-ips.conf
+if [[ -n "$ALLOWED_IPS_LIST_BASE64" ]] ; then
+  echo $ALLOWED_IPS_LIST_BASE64 | base64 -d  > $ALLOWED_IPS_CONF
+fi
+
+# generate allow-users.conf
+echo "# generate allow-users.conf"
+export ALLOWED_USERS_CONF="$basedir/vendor/nginx/conf/allow-users.conf"
+> $basedir/vendor/nginx/conf/allow-users.conf
+if [[ -n "$ALLOWED_USERS_LIST_BASE64" ]] ; then
+  echo $ALLOWED_USERS_LIST_BASE64 | base64 -d  > $ALLOWED_USERS_CONF
+fi
+
+# override default nginx config
+echo "# override default nginx config"
+cp config/nginx.conf.erb $basedir/base_nginx.conf.erb
+
+# start nginx
+echo "# start nginx"
+$basedir/bin/run

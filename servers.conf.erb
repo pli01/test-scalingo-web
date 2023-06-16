@@ -2,12 +2,42 @@
 server {
   listen <%= ENV['PORT'] %> default_server;
   server_name _;
+  #
+  # modsecurity
+  #
   modsecurity on;   # Enable ModSecurity on /
   modsecurity_rules_file /app/modsecurity_rules.conf;   # load custom rules file
+  #
+  # basic auth/restric per used/password
+  #
+  auth_basic           "Restricted Area";
+  auth_basic_user_file <%= ENV['ALLOWED_USERS_CONF'] %>;
+  #
+  # /protected location
+  #
+  location ~ /protected {
+    # both conditions user + ip
+    satisfy all;
+    #
+    # restrict per ip/cidr
+    #
+    include <%= ENV['ALLOWED_IPS_CONF'] %>;
+    #
+    try_files DUMMY @return200;
+    deny all;
+  }
 
   location / {
+    #
+    # disable basic auth
+    #
+    auth_basic off;
     # simple 'ok' response
     #
+    try_files DUMMY @return200;
+  }
+
+  location @return200 {
     add_header Content-Type text/plain;
     return 200 'ok';
   }
